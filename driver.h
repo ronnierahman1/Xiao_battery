@@ -1,0 +1,3 @@
+#define BOARD_SCREEN_COMBO 502 // 7.5 inch monochrome ePaper Screen （UC8179）
+#define USE_XIAO_EPAPER_DRIVER_BOARD
+#define EPAPER_ENABLE             // ensure EPaper class is compiled in

@@ -1,0 +1,23 @@
+﻿# Build output
+build/
+.cache/
+.vscode/.arduino.json
+
+# Arduino / PlatformIO generated files
+*.elf
+*.bin
+*.hex
+*.map
+
+# Secrets and local config
+secrets.h
+config.local.h
+.env
+*.env
+wifi_credentials.h
+credentials.h
+private_config.h
+
+# OS files
+.DS_Store
+Thumbs.db
