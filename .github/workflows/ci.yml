@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Arduino lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run arduino-lint
+        uses: arduino/arduino-lint-action@v2
+        with:
+          project-type: sketch
+          path: ${{ github.workspace }}
+
+  compile:
+    name: Compile sketch
+    if: ${{ vars.ARDUINO_FQBN != '' }}
+    needs: lint
+    runs-on: ubuntu-latest
+    env:
+      ARDUINO_FQBN: ${{ vars.ARDUINO_FQBN }}
+      ARDUINO_BOARD_MANAGER_URLS: ${{ vars.ARDUINO_BOARD_MANAGER_URLS }}
+      SKETCH_PATH: Xiao_battery.ino
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Install platform
+        shell: bash
+        run: |
+          set -euo pipefail
+          CORE="$(echo "$ARDUINO_FQBN" | cut -d: -f1,2)"
+          if [ -n "$ARDUINO_BOARD_MANAGER_URLS" ]; then
+            arduino-cli core update-index --additional-urls "$ARDUINO_BOARD_MANAGER_URLS"
+            arduino-cli core install "$CORE" --additional-urls "$ARDUINO_BOARD_MANAGER_URLS"
+          else
+            arduino-cli core update-index
+            arduino-cli core install "$CORE"
+          fi
+
+      - name: Compile
+        run: arduino-cli compile --fqbn "$ARDUINO_FQBN" "$SKETCH_PATH"
